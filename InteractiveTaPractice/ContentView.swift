@@ -54,7 +54,7 @@ struct InteractiveTabBar: View {
                 TabButton(tab)
             }
         }
-        .frame(height: 35)
+        .frame(height: 50)
         .padding(.horizontal, 15)
         .padding(.bottom, 10)
         .background(.background.shadow(.drop(color: .primary.opacity(0.2), radius: 5)))
@@ -69,7 +69,7 @@ struct InteractiveTabBar: View {
         VStack(spacing: 6) {
             Image(systemName: tab.symbolImage)
                 .symbolVariant(.fill)
-                .frame(width: isActive ? 50 : 25, height: isActive ? 50 : 25)
+                .frame(width: isActive ? 50: 25, height: isActive ? 50 : 25)
                 .background {
                     if isActive {
                         Circle()
@@ -78,8 +78,19 @@ struct InteractiveTabBar: View {
                 }
             /// This gives use the elevation we needed to push the active tab
                 .frame(width: 25, height: 25, alignment: .bottom)
+                .foregroundStyle(isActive ? .white : .primary)
+            
+            Text(tab.rawValue)
+                .font(.caption2)
+                .foregroundStyle(isActive ? .blue : .gray)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(.rect)
+        .onTapGesture {
+            withAnimation(.snappy) {
+                activeTab = tab
+            }
+        }
     }
 }
 
@@ -87,12 +98,12 @@ struct InteractiveTabBar: View {
     ContentView()
 }
 
-
 enum TabItem: String, CaseIterable {
     case home = "Home"
     case search = "Search"
     case notification = "Notifications"
     case setting = "Settings"
+
     
     var symbolImage: String {
         switch self {
