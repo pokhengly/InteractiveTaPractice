@@ -61,11 +61,15 @@ struct InteractiveTabBar: View {
                 TabButton(tab)
             }
         }
-        .frame(height: 50)
+        .frame(height: 40 )
+        .padding(5)
+        .background {
+            Capsule()
+                .fill(.background.shadow(.drop(color: .primary.opacity(0.2), radius: 5)))
+        }
+        .coordinateSpace(.named("TABBAR"))
         .padding(.horizontal, 15)
         .padding(.bottom, 10)
-        .background(.background.shadow(.drop(color: .primary.opacity(0.2), radius: 5)))
-        .coordinateSpace(.named("TABBAR"))
     }
     
     
@@ -77,59 +81,53 @@ struct InteractiveTabBar: View {
         VStack(spacing: 6) {
             Image(systemName: tab.symbolImage)
                 .symbolVariant(.fill)
-                .frame(width: isActive ? 50: 25, height: isActive ? 50 : 25)
-                .background {
-                    if isActive {
-                        Circle()
-                            .fill(.blue.gradient)
-                        // animation cycle interaction smooth with tabbar
-                            .matchedGeometryEffect(id: "ACTIVETAB", in: animation)
-                    }
-                }
-            /// Now, let's make it as a interactive tab bar
-                .contentShape(.rect)
-                .gesture(
-                    DragGesture(coordinateSpace: .named("TABBAR"))
-                        .onChanged { value in
-                            let location = value.location
-                            /// Checking if the location falls within any stored locatons; if so, switching to the approperate index
-                            if let index = tabButtonLocations.firstIndex(where: { $0.contains(location)
-                                }) {
-                                withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
-                                    activeDraggingTab = TabItem.allCases[index]
-                                }
-                            }
-                        }.onEnded { _ in
-                            /// pushing chnages to the actual tab view
-                            if let activeDraggingTab {
-                                
-                            }
-                            activeDraggingTab = nil
-                            
-                        },
-                    /// This will immediately become false once the tab is moved, so chnage this to check the actual tab value insteat of the dragged value
-                    isEnabled: activeTab == tab
-                )
-            /// This gives use the elevation we needed to push the active tab
-                .frame(width: 25, height: 25, alignment: .bottom)
                 .foregroundStyle(isActive ? .white : .primary)
-            
-            Text(tab.rawValue)
-                .font(.caption2)
-                .foregroundStyle(isActive ? .blue : .gray)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background {
+            if isActive {
+                Capsule()
+                    .fill(.blue.gradient)
+                    .matchedGeometryEffect(id: "ACTIVETAB", in: animation)
+            }
+        }
         .onGeometryChange(for: CGRect.self, of: {
             $0.frame(in: .named("TABBAR"))
         }, action: { newValue in
             tabButtonLocations[tab.index] = newValue
         })
+        /// this  is because, the interactions are being clipped within it's bouns
         .contentShape(.rect)
         .onTapGesture {
             withAnimation(.snappy) {
                 activeTab = tab
             }
         }
+        
+//        /// Now, let's make it as a interactive tab bar
+//            .contentShape(.rect)
+            .gesture(
+                DragGesture(coordinateSpace: .named("TABBAR"))
+                    .onChanged { value in
+                        let location = value.location
+                        /// Checking if the location falls within any stored locatons; if so, switching to the approperate index
+                        if let index = tabButtonLocations.firstIndex(where: { $0.contains(location)
+                            }) {
+                            withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
+                                activeDraggingTab = TabItem.allCases[index]
+                            }
+                        }
+                    }.onEnded { _ in
+                        /// pushing chnages to the actual tab view
+                        if let activeDraggingTab {
+                            
+                        }
+                        activeDraggingTab = nil
+                        
+                    },
+                /// This will immediately become false once the tab is moved, so chnage this to check the actual tab value insteat of the dragged value
+                isEnabled: activeTab == tab
+            )
     }
 }
 
